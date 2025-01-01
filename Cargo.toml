@@ -1,0 +1,7 @@
+[package]
+name = "qanik"
+version = "0.0.9"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.95"
