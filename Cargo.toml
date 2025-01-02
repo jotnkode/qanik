@@ -1,7 +1,16 @@
 [package]
 name = "qanik"
-version = "0.0.9"
+version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+repository = "https://github.com/jotnkode/qanik"
+readme = "README.md"
+description = "A simple rust implementation of twitter's SnowFlake."
+
+[profile.release]
+strip = "debuginfo"
+debug = false
+opt-level = 3
 
 [dependencies]
 anyhow = "1.0.95"

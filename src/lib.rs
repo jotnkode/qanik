@@ -102,7 +102,7 @@ mod tests {
     }
     #[test]
     fn check_generated_id() {
-        let snowflake = SnowFlake::new(1, 1).expect("HOOP");
+        let snowflake = SnowFlake::new(1, 1).expect("Something went wrong...");
         let id = snowflake.generate_id();
 
         assert_eq!(id & 1, 1);
