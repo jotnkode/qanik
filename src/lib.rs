@@ -7,12 +7,12 @@
 //! ```
 //! use qanik::SnowFlake;
 //!
-//! fn main() {
-//!     let snowflake: SnowFlake = SnowFlake::new(1, 1)
-//!         .expect("Datacenter or machine id is too big.");
-//!     let id: u64 = snowflake.generate_id();
-//!     // Use the generated id to persist any record
-//! }
+//!
+//!  let snowflake: SnowFlake = SnowFlake::new(1, 1)
+//!     .expect("Datacenter or machine id is too big.");
+//!  let id: u64 = snowflake.generate_id();
+//!  // Use the generated id to persist any record
+//!
 //! ```
 
 use anyhow::{anyhow, Error};
@@ -64,11 +64,13 @@ impl SnowFlake {
     pub fn generate_id(&self) -> u64 {
         let sequence: &AtomicU64 = &self.sequence;
         let current = sequence.fetch_add(1, Ordering::Relaxed);
-        sequence.compare_exchange(MAX_SEQUENCE, 1, Ordering::SeqCst, Ordering::Relaxed).unwrap_or_else(| e | e);
+        sequence
+            .compare_exchange(MAX_SEQUENCE, 1, Ordering::SeqCst, Ordering::Relaxed)
+            .unwrap_or_else(|e| e);
         if current == MAX_SEQUENCE {
-            thread::sleep(Duration::from_millis(1))    
+            thread::sleep(Duration::from_millis(1))
         }
-        
+
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went to heck!")
