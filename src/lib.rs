@@ -17,8 +17,8 @@
 
 use anyhow::{anyhow, Error};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
-
+use std::thread;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 pub const EPOCH_START: u128 = 1119657600000; // 2005-06-25
 
@@ -62,9 +62,13 @@ impl SnowFlake {
 
     /// Generate a new snowflake id in the sequence for the current timestamp, datacenter and machine
     pub fn generate_id(&self) -> u64 {
-        let sequence = self
-            .sequence.load(Ordering::Relaxed);
-
+        let sequence: &AtomicU64 = &self.sequence;
+        let current = sequence.fetch_add(1, Ordering::Relaxed);
+        sequence.compare_exchange(MAX_SEQUENCE, 1, Ordering::SeqCst, Ordering::Relaxed).unwrap_or_else(| e | e);
+        if current == MAX_SEQUENCE {
+            thread::sleep(Duration::from_millis(1))    
+        }
+        
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went to heck!")
@@ -76,7 +80,7 @@ impl SnowFlake {
         id = id
             | (self.datacenter_id << (MACHINE_ID_BITS + SEQUENCE_BITS))
             | (self.machine_id << SEQUENCE_BITS)
-            | sequence;
+            | current;
         id
     }
 }
